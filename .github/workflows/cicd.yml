@@ -1,0 +1,29 @@
+name: CI Build with .env from Secret
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env from GitHub Secret
+        run: echo "${{ secrets.DOT_ENV_CONTENT }}" > .env
+
+      - name: Build Docker image
+        run: docker build -t openwebui-app .
+
+      # 선택: Docker Compose로 실행 테스트
+      - name: Run Docker Compose (optional)
+        run: docker-compose up -d --build
+
+      # 선택: 종료 및 정리
+      - name: Shutdown containers
+        if: always()
+        run: docker-compose down
+
