@@ -1,6 +1,5 @@
 name: CI Build with .env from Secret
 
-
 on:
   push:
     branches: [main]
@@ -8,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,12 +17,24 @@ jobs:
       - name: Build Docker image
         run: docker build -t openwebui-app .
 
-      # 선택: Docker Compose로 실행 테스트
-      - name: Run Docker Compose (optional)
-        run: docker-compose up -d --build
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Step
+        run: echo "Deploy step executed"
 
-      # 선택: 종료 및 정리
-      - name: Shutdown containers
-        if: always()
-        run: docker-compose down
+      # Optional: docker-compose 사용 시 필요
+      # - name: Install docker-compose
+      #   run: |
+      #     sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      #     sudo chmod +x /usr/local/bin/docker-compose
+      #     docker-compose --version
+
+      # - name: Run Docker Compose (optional)
+      #   run: docker-compose up -d --build
+
+      # - name: Shutdown containers
+      #   if: always()
+      #   run: docker-compose down
 
