@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  litellm:
+    container_name: litellm
+    build:
+      context: ./litellm_project
+      dockerfile: Dockerfile
+    env_file:
+      - ./litellm_project/.env
+    ports:
+      - "4000:4000"
+    expose:
+      - "4000"
+    networks:
+      - litellm_network
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+    ports:
+      - "3000:8080"
+    environment:
+      - LITELLM_API_BASE=http://litellm:4000/v1
+      - LITELLM_API_KEY=sk-1234
+    depends_on:
+      - litellm
+    networks:
+      - litellm_network
+
+networks:
+  litellm_network:
+    driver: bridge

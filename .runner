@@ -1,0 +1,9 @@
+﻿{
+  "agentId": 2,
+  "agentName": "gangjiseog-ui-MacBookAir",
+  "poolId": 1,
+  "poolName": "Default",
+  "serverUrl": "https://pipelinesghubeus24.actions.githubusercontent.com/HZVEDQw3f6p2CAG7UU0uU7fVlztLBAcqYp1eKZOYF9PkeutvHY/",
+  "gitHubUrl": "https://github.com/ju2tziseok/ci-cd-test",
+  "workFolder": "_work"
+}

@@ -1,0 +1,20 @@
+model_list:
+  - model_name: deepseek-r1
+    litellm_provider: openrouter
+    litellm_params:
+      model: deepseek/deepseek-r1:free
+      api_base: https://openrouter.ai/api/v1/chat/completions
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemini-pro
+    litellm_provider: google
+    litellm_params:
+      model: gemini-1.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      api_base: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
+
+litellm_settings:
+  drop_params: true
+  set_verbose: true    
+
+

@@ -1,0 +1,25 @@
+name: LiteLLM + OpenWebUI CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up .env file from GitHub Secret
+        run: |
+          echo "${{ secrets.DOT_ENV_CONTENT }}" > .env
+          echo ".env created:"
+          cat .env
+
+      - name: Docker Compose Up
+        run: |
+          docker compose down || true
+          docker compose up -d --build
+
