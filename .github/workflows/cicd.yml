@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,21 +21,11 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - name: Deploy Step
-        run: echo "Deploy step executed"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Optional: docker-compose 사용 시 필요
-      # - name: Install docker-compose
-      #   run: |
-      #     sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      #     sudo chmod +x /usr/local/bin/docker-compose
-      #     docker-compose --version
-
-      # - name: Run Docker Compose (optional)
-      #   run: docker-compose up -d --build
-
-      # - name: Shutdown containers
-      #   if: always()
-      #   run: docker-compose down
+      - name: Deploy step (dummy)
+        run: echo "🚀 Deploying openwebui-app..." 
 
