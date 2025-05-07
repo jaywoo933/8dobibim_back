@@ -12,15 +12,14 @@ services:
     environment:
       # .env 파일 또는 직접 여기에 API 키를 설정하세요.
       # LiteLLM 설정 파일 (config.yaml) 내에서도 설정할 수 있습니다.
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - AZURE_API_KEY=${AZURE_API_KEY}
       - AZURE_API_BASE=${AZURE_API_BASE}
       - AZURE_API_VERSION=${AZURE_API_VERSION}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
       - LITELLM_SALT_KEY=${LITELLM_SALT_KEY}
       - LITELLM_LICENSE=${LITELLM_LICENSE}
       - DATABASE_URL=${DATABASE_URL}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       # 추가 클라우드 서비스 또는 로컬 모델 API 키/주소 등
       # - OLLAMA_API_BASE_URL=http://host.docker.internal:11434 # Docker 호스트에서 Ollama 실행 시 예시
     volumes:
