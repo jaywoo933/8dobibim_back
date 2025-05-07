@@ -13,3 +13,7 @@ _work/
 *.pyc
 __pycache__/
 .vscode/
+
+#terraform 디렉토리
+.terraform
+.terraform.lock.hcl
