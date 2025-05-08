@@ -61,7 +61,7 @@ jobs:
             -auto-approve \
             -var-file="terraform.tfvars" \
             -var="aws_region=${{ vars.AWS_REGION || 'ap-northeast-2' }}" \
-            -var="ami_id=${{ vars.AMI_ID_UBUNTU_2004 }}" \
+            -var="ami_id=ami-0d5bb3742db8fc264" \
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
             -var="key_name=${{ vars.SSH_KEY_NAME }}" \
