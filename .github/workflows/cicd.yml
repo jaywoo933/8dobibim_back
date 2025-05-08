@@ -46,7 +46,6 @@ jobs:
             -var="ami_id=${{ vars.AMI_ID_UBUNTU_2004 }}" \
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
-          
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
             -input=false
@@ -64,7 +63,6 @@ jobs:
             -var="ami_id=ami-0d5bb3742db8fc264" \
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
-            
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
             -input=false
