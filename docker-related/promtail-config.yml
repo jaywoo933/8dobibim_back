@@ -9,23 +9,34 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: nginx-logs
-    # Nginx 로그 파일이 있는 경로 (docker-compose에서 마운트한 경로)
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: nginx
-          container_name: nginx_ab_router # 컨테이너 이름 레이블 추가 (Grafana 필터링에 유용)
-          __path__: /var/log/nginx/access.log # Nginx 로그 파일 경로
+  - job_name: docker-nginx-logs
+    # Docker 데몬에서 로그를 직접 가져오는 설정입니다.
+    # docker_sd_configs는 리스트 형태여야 합니다.
+    docker_sd_configs:
+      # 이 하이픈(-)이 리스트의 첫 번째 항목을 나타냅니다.
+      - host: unix:///var/run/docker.sock # Docker 소켓 경로 (환경에 맞게 수정)
+
+    # 어떤 컨테이너의 로그를 가져올지 필터링하고 레이블을 추가합니다.
+    relabel_configs:
+      # ... (이전과 동일) ...
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/nginx_ab_router'
+        action: keep
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: container_name
+        replacement: '$1'
+      - source_labels: ['__meta_docker_image']
+        target_label: image_name
+      - source_labels: ['__meta_docker_container_id']
+        target_label: container_id
+        regex: '(.{12}).*'
+
+    # 로그 라인을 파싱하고 레이블을 추출하는 파이프라인
     pipeline_stages:
-      # Nginx의 ab_test_loki_format에 맞는 Grok 패턴
-      # 패턴은 실제 로그 라인과 정확히 일치해야 합니다.
+      # ... (이전과 동일) ...
       - grok:
-          # 예시 패턴: IP - user [시간] "요청" 상태 본문크기 "Referer" "UserAgent" "XFF" "AB_VERSION"
-          # 각 필드에 이름을 부여하여 추출합니다.
           pattern: '%{IPORHOST:remote_addr} - %{WORD:remote_user} \[%{HTTPDATE:time_local}\] \"(?:%{WORD:method})? %{NOTSPACE:request}(?: HTTP/%{NUMBER:http_version})?\" %{NUMBER:status} %{NUMBER:body_bytes_sent} \"%{DATA:http_referer}\" \"%{DATA:http_user_agent}\" \"%{DATA:http_x_forwarded_for}\" \"%{DATA:ab_version}\"'
-      # Grok에서 추출한 필드를 Loki 레이블로 변환
       - labels:
-          status: # HTTP 상태 코드 레이블
-          ab_version: # AB 테스트 버전 레이블 (예: openwebui_v1_servers, openwebui_v2_servers)
+          status:
+          ab_version:
