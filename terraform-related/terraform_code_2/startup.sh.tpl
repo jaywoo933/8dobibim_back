@@ -1,5 +1,3 @@
-
-
 #!/bin/bash
 set -e
 
@@ -12,7 +10,7 @@ newgrp docker || true
 mkdir -p /opt/openwebui
 cd /opt/openwebui
 
-echo "<<env_file_content>>" | base64 -d > .env
-echo "<<docker_compose_content>>" | base64 -d > docker-compose.yml
+echo "${env_file_content}" | base64 -d > .env
+echo "${docker_compose_content}" | base64 -d > docker-compose.yml
 
 docker-compose up -d
