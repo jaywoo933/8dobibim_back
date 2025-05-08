@@ -26,10 +26,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }}
 
-      - name: Set Terraform environment variables
+      - name: Set Terraform variables via Environment Variables
         run: |
-          echo "TF_VAR_openai_api_key=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-          echo "TF_VAR_env_file_content=${{ secrets.DOT_ENV_CONTENT }}" >> $GITHUB_ENV
+            echo "TF_VAR_env_file_content=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+        
       - name: Set docker-compose content as env var
         run: |
           echo "TF_VAR_docker_compose_content=$(base64 < docker-related/docker-compose.yml | tr -d '\n')" >> $GITHUB_ENV
@@ -51,8 +51,7 @@ jobs:
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
-          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-          TF_VAR_env_file_content: ${{ secrets.DOT_ENV_CONTENT }}
+          TF_VAR_env_file_content: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Terraform Apply
         run: |
@@ -69,7 +68,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-          TF_VAR_env_file_content: ${{ secrets.DOT_ENV_CONTENT }}
+          
 
 
       
