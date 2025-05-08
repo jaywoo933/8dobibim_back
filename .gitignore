@@ -17,5 +17,5 @@ __pycache__/
 #terraform 디렉토리 및 상태파일
 .terraform
 .terraform.lock.hcl
-terraform-related/terraform.tfstate
-terraform-related/terraform.tfstate.backup
+terraform-related/terraform_code_1/terraform.tfstate
+terraform-related/terraform_code_1/terraform.tfstate.backup
