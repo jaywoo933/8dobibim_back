@@ -47,6 +47,7 @@ jobs:
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
+            -var="env_file_content=${{ secrets.OPENAI_API_KEY }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -64,6 +65,7 @@ jobs:
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
+            -var="env_file_content=${{ secrets.OPENAI_API_KEY }}" \
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
