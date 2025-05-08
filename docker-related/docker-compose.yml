@@ -208,6 +208,6 @@ volumes:
   open_webui_v2_data: # OpenWebUI V2 데이터를 영속적으로 저장할 명명된 볼륨 (새로 추가)
   prometheus_data: # Prometheus 데이터 볼륨
   # grafana_data:
-  # nginx_logs: # <-- Nginx 로그를 위한 새로운 볼륨 정의
+  nginx_logs: # <-- Nginx 로그를 위한 새로운 볼륨 정의
 
   # litellm_data: # LiteLLM 데이터용 볼륨 (필요시 주석 해제)
