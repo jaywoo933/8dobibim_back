@@ -1,66 +1,122 @@
-# .github/workflows/cicd.yml
-# 이 파일은 프로젝트 루트의 .github/workflows/ 폴더 안에 위치해야 합니다.
+# .github/workflows/deploy-aws.yml
 
-name: Deploy Docker Compose to Local Machine # 워크플로우 이름
+name: Deploy to AWS EC2
 
-# main 브랜치에 푸시될 때 실행
-on: # 트리거 조건 설정
+on:
   push:
-    branches: [ main ] # main 브랜치에 push 이벤트 발생 시 실행
+    branches:
+      - main # main 브랜치에 push될 때마다 실행
 
-jobs: # 작업 정의
-  deploy: # 배포 작업 정의 (이름은 원하는 대로 변경 가능)
-    name: Deploy to Local Machine # GitHub Actions UI에 표시될 작업 이름
-    
-    # 중요: 여기서 사용하는 레이블은 로컬 컴퓨터 러너 설정 시 입력한 레이블과 정확히 일치해야 합니다!
-    runs-on: [self-hosted, local, windows, docker] # 작업을 실행할 러너 지정 (예: 로컬 Windows 러너)
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # GitHub Actions 실행 환경
 
-    # 환경 변수 설정: 워크플로우 내에서 사용할 변수 정의
     env:
-      # 중요: 이 경로는 실제 로컬 컴퓨터에서 프로젝트 파일이 위치하고
-      # Docker Compose가 실행될 경로로 **반드시** 수정해야 합니다!
-      DEPLOY_PATH: C:\Users\Woo\Desktop\TEST\multi_contain # Windows 경로 예시
+      # Terraform 명령을 실행할 디렉토리 설정
+      TF_WORKING_DIR: ./terraform
 
-    steps: # 작업 내 실행될 단계들 정의
-      # 1단계: 코드를 러너의 기본 작업 공간에 체크아웃
-      - name: Checkout code to workspace # 단계 이름
-        uses: actions/checkout@v4 # 표준 체크아웃 액션 사용
-        # 'path:' 옵션은 제거하여 기본 경로(${github.workspace})에 체크아웃합니다.
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # 2단계: 작업 공간의 파일을 최종 배포 경로로 복사/동기화 (robocopy 수정됨)
-      - name: Copy files to deployment directory
-        # robocopy /MIR 옵션으로 원본과 대상 동기화
-        # /XD .git : 대상의 .git 폴더는 삭제/변경하지 않음
-        # /XF .env : 대상의 .env 파일은 삭제/변경하지 않음
-        # /NFL /NDL 등 : 로그 출력 최소화 옵션
-        run: robocopy ${{ github.workspace }} ${{ env.DEPLOY_PATH }} /MIR /XD .git /XF .env /NFL /NDL /NJH /NJS /nc /ns /np
-        shell: cmd # robocopy는 cmd 셸에서 실행
-        # robocopy는 성공(파일 복사됨) 시 종료 코드 1 등을 반환할 수 있음
-        # GitHub Actions는 기본적으로 종료 코드 0 외에는 실패로 처리하므로,
-        # 성공적인 robocopy 실행(종료 코드 1~7) 후에도 계속 진행하도록 설정
-        continue-on-error: true 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-      # 3단계: .env 파일 생성 (PowerShell 사용)
-      - name: Create .env file
-        working-directory: ${{ env.DEPLOY_PATH }} # 작업 디렉토리를 배포 경로로 설정
-        # PowerShell을 사용하여 여러 줄 시크릿 내용을 .env 파일에 안정적으로 쓰기
+      # --- AWS 인증 ---
+      # GitHub Secrets에 저장된 AWS 자격증명 사용
+      # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY 환경 변수를 자동으로 설정합니다.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # GitHub Secrets에 저장된 Access Key ID
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # GitHub Secrets에 저장된 Secret Access Key
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # 사용할 AWS 리전 (GitHub Secret으로 관리하거나, Terraform 변수로 전달)
+          # 여기서는 워크플로우 환경 변수 또는 Terraform 변수로 전달하는 방식 사용
+          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }} # GitHub Variables 또는 기본값 사용
+
+      # --- Terraform 환경 변수 설정 ---
+      # Terraform 변수로 전달할 민감 정보 (API 키 등)는 여기서 환경 변수로 설정합니다.
+      # TF_VAR_NAME 형식의 환경 변수는 Terraform의 NAME 변수에 자동으로 할당됩니다.
+      - name: Set Terraform variables via Environment Variables
         run: |
-          "${{ secrets.DOT_ENV_CONTENT }}" | Out-File -Encoding utf8 .env
-          Write-Host ".env file created successfully." # 로그에 성공 메시지 출력 (선택 사항)
-        shell: powershell # powershell 셸 사용
+          echo "TF_VAR_openai_api_key=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+          # 만약 AWS 리전, AMI ID, VPC ID, Subnet ID 등을 Secret 또는 Variable로 관리한다면 여기서 설정
+          # echo "TF_VAR_aws_region=${{ vars.AWS_REGION }}" >> $GITHUB_ENV # GitHub Variables 예시
+          # echo "TF_VAR_ami_id=${{ vars.AMI_ID_UBUNTU_2004 }}" >> $GITHUB_ENV
+          # echo "TF_VAR_vpc_id=${{ vars.VPC_ID_DEV }}" >> $GITHUB_ENV
+          # echo "TF_VAR_subnet_id=${{ vars.SUBNET_ID_DEV }}" >> $GITHUB_ENV
+          # echo "TF_VAR_key_name=${{ vars.SSH_KEY_NAME }}" >> $GITHUB_ENV
+          # echo "TF_VAR_instance_name=my-llm-instance-${{ github.run_number }}" >> $GITHUB_ENV # 실행 번호로 인스턴스 이름 동적 생성 예시
 
-      # 4단계: Docker Compose 스택 배포 (PowerShell 사용 권장)
-      - name: Deploy Docker Compose Stack
-        working-directory: ${{ env.DEPLOY_PATH }} # 작업 디렉토리를 배포 경로로 설정
-        # PowerShell 스크립트 실행 (Write-Host로 로그 출력)
-        run: |
-          Write-Host "Pulling latest images..."
-          docker-compose pull
-          Write-Host "Stopping and removing old containers..."
-          docker-compose down
-          Write-Host "Starting new containers..."
-          docker-compose up -d
-          Write-Host "Cleaning up unused images..."
-          docker image prune -f
-          Write-Host "Deployment complete."
-        shell: powershell # Windows 러너와의 일관성을 위해 powershell 권장
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Plan
+        run: terraform plan \
+          -var-file="terraform.tfvars" \ # 비민감성 기본 변수 파일 사용
+          # GitHub Secrets 또는 Variables에서 가져온 값으로 변수 재정의
+          -var="aws_region=${{ vars.AWS_REGION || 'ap-northeast-2' }}" \
+          -var="ami_id=${{ vars.AMI_ID_UBUNTU_2004 }}" \ # 사용하는 AMI ID 변수로 전달 (Variable에 정의 필요)
+          -var="vpc_id=${{ vars.VPC_ID_DEV }}" \ # VPC ID 변수로 전달 (Variable에 정의 필요)
+          -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \ # Subnet ID 변수로 전달 (Variable에 정의 필요)
+          -var="key_name=${{ vars.SSH_KEY_NAME }}" \ # Key Pair 이름 변수로 전달 (Variable에 정의 필요)
+          -var="instance_name=llm-webui-host-${{ github.run_number }}" \ # 인스턴스 이름 동적 생성
+          -var="docker_compose_content=${{ base64encode(fromFile('docker-related/docker-compose.yml')) }}" \ # docker-compose.yml 내용 전달
+          # 만약 Nginx 설정 파일이 있다면 이 변수도 전달 (이전 A/B 테스트 아키텍처 시)
+          # -var="nginx_config_content=${{ base64encode(fromFile('docker-related/nginx/nginx.conf')) }}" \
+          -input=false # CI 환경에서는 사용자 입력을 받지 않도록 설정
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          # plan 단계에서도 sensitive 변수는 env로 다시 전달 (plan 결과에는 sensitive로 마스킹됨)
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Terraform Apply
+        run: terraform apply \
+          -auto-approve \ # 계획 확인 없이 자동으로 승인하고 적용
+          -var-file="terraform.tfvars" \
+          -var="aws_region=${{ vars.AWS_REGION || 'ap-northeast-2' }}" \
+          -var="ami_id=${{ vars.AMI_ID_UBUNTU_2004 }}" \
+          -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
+          -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
+          -var="key_name=${{ vars.SSH_KEY_NAME }}" \
+          -var="instance_name=llm-webui-host-${{ github.run_number }}" \
+          -var="docker_compose_content=${{ base64encode(fromFile('docker-related/docker-compose.yml')) }}" \
+          # 만약 Nginx 설정 파일이 있다면 이 변수도 전달
+          # -var="nginx_config_content=${{ base64encode(fromFile('docker-related/nginx/nginx.conf')) }}" \
+          -input=false
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+
+      # 배포 후 확인 단계 (선택 사항)
+      # - name: Get EC2 Public IP
+      #   id: get_ip
+      #   run: |
+      #     # Terraform Output에서 인스턴스 Public IP를 가져오는 명령
+      #     # (main.tf에 Public IP를 Output으로 정의해야 함)
+      #     EC2_IP=$(terraform output -raw instance_public_ip)
+      #     echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      # - name: Verify Deployment
+      #   if: env.EC2_IP != ''
+      #   run: |
+      #     sleep 60 # 인스턴스 시작 및 Docker Compose 실행 대기
+      #     curl -v --max-time 10 http://${{ env.EC2_IP }}:8080
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+
+      # --- 인프라 삭제 (선택 사항, 예를 들어 특정 브랜치 삭제 시) ---
+      # on:
+      #   pull_request:
+      #     types: [closed]
+      # if: github.event.pull_request.merged == true
+      # jobs:
+      #   destroy:
+      #     steps:
+      #       ... (Checkout, AWS Auth, Setup Terraform, Set Env Vars 동일) ...
+      #       - name: Terraform Destroy
+      #         run: terraform destroy -auto-approve -var-file="terraform.tfvars" ... (plan/apply와 동일 변수)
+      #         working-directory: ${{ env.TF_WORKING_DIR }}
+      #         env: ... (동일 환경 변수) ...
