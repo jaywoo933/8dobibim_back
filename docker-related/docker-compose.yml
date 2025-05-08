@@ -159,44 +159,44 @@ services:
   # ############################################
   # NginX 테스트 상황 시각화를 위한 Gafana, Loki, Promtail
   # ############################################    
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    networks:
-      - webui_network
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    restart: unless-stopped
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - webui_network
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   depends_on:
+  #     - prometheus
+  #   restart: unless-stopped
 
-  loki:
-    image: grafana/loki:2.9.2
-    container_name: loki
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - webui_network
+  # loki:
+  #   image: grafana/loki:2.9.2
+  #   container_name: loki
+  #   ports:
+  #     - "3100:3100"
+  #   command: -config.file=/etc/loki/local-config.yaml
+  #   networks:
+  #     - webui_network
 
-  promtail:
-    image: grafana/promtail:2.9.2 # 또는 다른 버전 유지
-    container_name: promtail
-    volumes:
-      # Nginx 로그 볼륨을 Promtail 컨테이너의 동일 경로에 마운트 (읽기 전용 권장)
-      - nginx_logs:/var/log/nginx:ro # Nginx와 같은 볼륨을 마운트
-      # Promtail 설정을 마운트합니다.
-      - ./promtail-config.yml:/etc/promtail/config.yml
-      # Docker 소켓 마운트는 이 방식에서는 필요 없습니다. (주석 처리하거나 삭제)
-      # - /var/run/docker.sock:/var/run/docker.sock
-    command: -config.file=/etc/promtail/config.yml
-    networks:
-      - webui_network
-    depends_on:
-      - loki
-      - nginx_proxy # Nginx가 로그를 기록한 후에 Promtail이 시작되도록 의존성 추가 (선택 사항이지만 안전함)
+  # promtail:
+  #   image: grafana/promtail:2.9.2 # 또는 다른 버전 유지
+  #   container_name: promtail
+  #   volumes:
+  #     # Nginx 로그 볼륨을 Promtail 컨테이너의 동일 경로에 마운트 (읽기 전용 권장)
+  #     - nginx_logs:/var/log/nginx:ro # Nginx와 같은 볼륨을 마운트
+  #     # Promtail 설정을 마운트합니다.
+  #     - ./promtail-config.yml:/etc/promtail/config.yml
+  #     # Docker 소켓 마운트는 이 방식에서는 필요 없습니다. (주석 처리하거나 삭제)
+  #     # - /var/run/docker.sock:/var/run/docker.sock
+  #   command: -config.file=/etc/promtail/config.yml
+  #   networks:
+  #     - webui_network
+  #   depends_on:
+  #     - loki
+  #     - nginx_proxy # Nginx가 로그를 기록한 후에 Promtail이 시작되도록 의존성 추가 (선택 사항이지만 안전함)
 
 networks:
   webui_network:
@@ -207,7 +207,7 @@ volumes:
   open_webui_v1_data: # OpenWebUI V1 데이터를 영속적으로 저장할 명명된 볼륨 (새로 추가)
   open_webui_v2_data: # OpenWebUI V2 데이터를 영속적으로 저장할 명명된 볼륨 (새로 추가)
   prometheus_data: # Prometheus 데이터 볼륨
-  grafana_data:
-  nginx_logs: # <-- Nginx 로그를 위한 새로운 볼륨 정의
+  # grafana_data:
+  # nginx_logs: # <-- Nginx 로그를 위한 새로운 볼륨 정의
 
   # litellm_data: # LiteLLM 데이터용 볼륨 (필요시 주석 해제)

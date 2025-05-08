@@ -45,15 +45,15 @@ scrape_configs:
         target_label: __host__
         replacement: '{{ .Target }}' # target 값 (localhost)으로 host 레이블 설정
 
-    # 로그 라인을 파싱하고 레이블을 추출하는 파이프라인 (이 부분은 동일하게 유지)
-    # Grok 스테이지가 이 방식에서는 정상 작동하기를 기대합니다.
-    pipeline_stages:
-      - grok:
-          pattern: '%{IPORHOST:remote_addr} - %{WORD:remote_user} \[%{HTTPDATE:time_local}\] \"(?:%{WORD:method})? %{NOTSPACE:request}(?: HTTP/%{NUMBER:http_version})?\" %{NUMBER:status} %{NUMBER:body_bytes_sent} \"%{DATA:http_referer}\" \"%{DATA:http_user_agent}\" \"%{DATA:http_x_forwarded_for}\" \"%{DATA:ab_version}\"'
-      # Grok에서 추출한 필드를 레이블로 추가
-      - labels:
-          status:
-          ab_version:
-          # Grok 패턴에서 추출한 다른 필드도 필요하면 여기에 추가 (예: method, request 등)
-          # method:
-          # request:
+    # # 로그 라인을 파싱하고 레이블을 추출하는 파이프라인 (이 부분은 동일하게 유지)
+    # # Grok 스테이지가 이 방식에서는 정상 작동하기를 기대합니다.
+    # pipeline_stages:
+    #   - grok:
+    #       pattern: '%{IPORHOST:remote_addr} - %{WORD:remote_user} \[%{HTTPDATE:time_local}\] \"(?:%{WORD:method})? %{NOTSPACE:request}(?: HTTP/%{NUMBER:http_version})?\" %{NUMBER:status} %{NUMBER:body_bytes_sent} \"%{DATA:http_referer}\" \"%{DATA:http_user_agent}\" \"%{DATA:http_x_forwarded_for}\" \"%{DATA:ab_version}\"'
+    #   # Grok에서 추출한 필드를 레이블로 추가
+    #   - labels:
+    #       status:
+    #       ab_version:
+    #       # Grok 패턴에서 추출한 다른 필드도 필요하면 여기에 추가 (예: method, request 등)
+    #       # method:
+    #       # request:
