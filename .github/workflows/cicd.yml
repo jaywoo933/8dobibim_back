@@ -46,7 +46,7 @@ jobs:
             -var="ami_id=${{ vars.AMI_ID_UBUNTU_2004 }}" \
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
-            -var="key_name=${{ vars.SSH_KEY_NAME }}" \
+          
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
             -input=false
@@ -64,7 +64,7 @@ jobs:
             -var="ami_id=ami-0d5bb3742db8fc264" \
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
-            -var="key_name=${{ vars.SSH_KEY_NAME }}" \
+            
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
             -input=false
@@ -74,32 +74,4 @@ jobs:
           TF_VAR_env_file_content: ${{ secrets.DOT_ENV_CONTENT }}
 
 
-      # 배포 후 확인 단계 (선택 사항)
-      # - name: Get EC2 Public IP
-      #   id: get_ip
-      #   run: |
-      #     # Terraform Output에서 인스턴스 Public IP를 가져오는 명령
-      #     # (main.tf에 Public IP를 Output으로 정의해야 함)
-      #     EC2_IP=$(terraform output -raw instance_public_ip)
-      #     echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
-      #   working-directory: ${{ env.TF_WORKING_DIR }}
-      # - name: Verify Deployment
-      #   if: env.EC2_IP != ''
-      #   run: |
-      #     sleep 60 # 인스턴스 시작 및 Docker Compose 실행 대기
-      #     curl -v --max-time 10 http://${{ env.EC2_IP }}:8080
-      #   working-directory: ${{ env.TF_WORKING_DIR }}
-
-      # --- 인프라 삭제 (선택 사항, 예를 들어 특정 브랜치 삭제 시) ---
-      # on:
-      #   pull_request:
-      #     types: [closed]
-      # if: github.event.pull_request.merged == true
-      # jobs:
-      #   destroy:
-      #     steps:
-      #       ... (Checkout, AWS Auth, Setup Terraform, Set Env Vars 동일) ...
-      #       - name: Terraform Destroy
-      #         run: terraform destroy -auto-approve -var-file="terraform.tfvars" ... (plan/apply와 동일 변수)
-      #         working-directory: ${{ env.TF_WORKING_DIR }}
-      #         env: ... (동일 환경 변수) ...
+      
