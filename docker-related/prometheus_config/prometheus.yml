@@ -9,7 +9,9 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090'] # Prometheus 웹 UI/API 포트
-
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx_exporter:9113']
   # 나중에 LiteLLM 등 다른 서비스에서 메트릭을 제공하면 여기에 추가
   # 예시: LiteLLM이 8000번 포트에서 메트릭을 제공한다고 가정
   # - job_name: 'litellm'
