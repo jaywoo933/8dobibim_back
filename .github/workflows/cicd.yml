@@ -53,7 +53,6 @@ jobs:
       - name: Terraform Init
         run: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
-
       - name: Terraform Plan
         run: terraform plan \
           -var-file="terraform.tfvars" \ # 비민감성 기본 변수 파일 사용
