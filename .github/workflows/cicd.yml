@@ -7,50 +7,53 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # GitHub Actions에서 사용할 실행 환경 (Ubuntu)
 
     env:
-      TF_WORKING_DIR: ./terraform-related/terraform_code_2
+      TF_WORKING_DIR: ./terraform-related/terraform_code_2  # Terraform 코드가 위치한 디렉토리
 
     steps:
+      # 저장소 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Terraform CLI 설치
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      # AWS 자격증명 구성 (GitHub Secrets를 통해)
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}              # GitHub Secrets로부터 불러옴
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }}           # 리전 값이 없으면 기본값으로 서울 사용
 
+      # .env 파일 내용을 환경 변수로 설정
       - name: Set Terraform .env content from Secrets
         run: echo "TF_VAR_env_file_content=${{ secrets.DOT_ENV_CONTENT }}" >> $GITHUB_ENV
-        
+
+      # docker-compose.yml 내용을 base64로 인코딩해 환경 변수로 등록
       - name: Set docker-compose content as env var
         run: |
-          echo "TF_VAR_docker_compose_content=$(base64 -w 0 docker-related/docker-compose.yml)" >> $GITHUB_ENV
-      
-      
-      
-      
+          echo "TF_VAR_docker_compose_content=$(base64 < docker-related/docker-compose.yml | tr -d '\n')" >> $GITHUB_ENV
+
+      # litellm_config.yaml 인코딩 후 환경 변수로 등록
       - name: Set litellm config content as env var
         run: |
-            echo "TF_VAR_litellm_config_content=$(base64 -w 0 docker-related/litellm_config.yaml)" >> $GITHUB_ENV
-        
+          echo "TF_VAR_litellm_config_content=$(base64 < docker-related/litellm_config.yaml | tr -d '\n')" >> $GITHUB_ENV
+
+      # prometheus.yml 인코딩 후 환경 변수로 등록
       - name: Set prometheus config content as env var
         run: |
-            echo "TF_VAR_prometheus_config_content=$(base64 -w 0 docker-related/prometheus_config/prometheus.yml)" >> $GITHUB_ENV
-        
-        
-        
-      
+          echo "TF_VAR_prometheus_config_content=$(base64 < docker-related/prometheus_config/prometheus.yml | tr -d '\n')" >> $GITHUB_ENV
+
+      # Terraform 초기화 (플러그인 설치 및 백엔드 설정 등)
       - name: Terraform Init
         run: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
 
+      # Terraform 계획(plan) 실행: 어떤 리소스를 생성할지 미리 확인
       - name: Terraform Plan
         run: |
           terraform plan \
@@ -67,8 +70,9 @@ jobs:
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
-          TF_VAR_env_file_content: ${{ secrets.DOT_ENV_CONTENT }}
+          TF_VAR_env_file_content: ${{ secrets.DOT_ENV_CONTENT }}  # Plan 명령에서도 필요한 민감 정보
 
+      # Terraform 적용(apply): 실제로 EC2 등 리소스를 생성
       - name: Terraform Apply
         run: |
           terraform apply \
@@ -86,8 +90,4 @@ jobs:
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
-          TF_VAR_openai_api_key: ${{ secrets.DOT_ENV_CONTENT }}
-          
-
-
-      
+          TF_VAR_openai_api_key: ${{ secrets.DOT_ENV_CONTENT }}  # (실제로는 env_file_content로 전달됨)
