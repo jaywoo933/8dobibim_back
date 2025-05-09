@@ -10,24 +10,18 @@ newgrp docker || true
 mkdir -p /opt/openwebui
 cd /opt/openwebui
 
-# .env 파일 저장 (base64 디코딩 필요)
+# .env 파일 저장 (base64 디코딩)
 echo "${env_file_content}" | base64 -d > .env
 
-# docker-compose.yml 저장 (멀티라인 YAML 처리)
-cat <<EOF > docker-compose.yml
-${docker_compose_content}
-EOF
+# docker-compose.yml 저장 (base64 디코딩)
+echo "${docker_compose_content}" | base64 -d > docker-compose.yml
 
-# litellm_config.yaml 저장
-cat <<EOF > litellm_config.yaml
-${litellm_config_content}
-EOF
+# litellm_config.yaml 저장 (base64 디코딩)
+echo "${litellm_config_content}" | base64 -d > litellm_config.yaml
 
-# prometheus config 저장
+# prometheus config 저장 (base64 디코딩)
 mkdir -p prometheus_config
-cat <<EOF > prometheus_config/prometheus.yml
-${prometheus_config_content}
-EOF
+echo "${prometheus_config_content}" | base64 -d > prometheus_config/prometheus.yml
 
 # 컨테이너 실행
 docker-compose up -d
