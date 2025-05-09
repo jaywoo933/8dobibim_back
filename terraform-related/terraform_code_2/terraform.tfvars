@@ -1,5 +1,5 @@
 ami_id         = "ami-0d5bb3742db8fc264" # Ubuntu 20.04 in ap-northeast-2
-instance_type  = "t3.micro"
+instance_type  = "t3.medium"
 subnet_id      = "subnet-019f43696c656abef"
 vpc_id         = "vpc-02a36fe480ecccb85"
 key_name = "openwebui-key"
