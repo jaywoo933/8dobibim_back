@@ -26,9 +26,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }}
 
-      - name: Set Terraform variables via Environment Variables
-        run: |
-            echo "TF_VAR_env_file_content=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+      - name: Set Terraform .env content from Secrets
+        run: echo "TF_VAR_env_file_content=${{ secrets.DOT_ENV_CONTENT }}" >> $GITHUB_ENV
         
       - name: Set docker-compose content as env var
         run: |
@@ -47,12 +46,12 @@ jobs:
             -var="vpc_id=${{ vars.VPC_ID_DEV }}" \
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
-            -var="env_file_content=${{ secrets.OPENAI_API_KEY }}" \
+            -var="env_file_content=${{ secrets.DOT_ENV_CONTENT }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
-          TF_VAR_env_file_content: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_env_file_content: ${{ secrets.DOT_ENV_CONTENT }}
 
       - name: Terraform Apply
         run: |
@@ -65,11 +64,11 @@ jobs:
             -var="subnet_id=${{ vars.SUBNET_ID_DEV }}" \
             -var="instance_name=llm-webui-host-${{ github.run_number }}" \
             -var="docker_compose_content=${{ env.TF_VAR_docker_compose_content }}" \
-            -var="env_file_content=${{ secrets.OPENAI_API_KEY }}" \
+            -var="env_file_content=${{ secrets.DOT_ENV_CONTENT }}" \
             -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
-          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_openai_api_key: ${{ secrets.DOT_ENV_CONTENT }}
           
 
 
