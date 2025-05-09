@@ -31,21 +31,29 @@ jobs:
         
       - name: Set docker-compose content as env var
         run: |
-          echo "TF_VAR_docker_compose_content<<EOF" >> $GITHUB_ENV
-          cat docker-related/docker-compose.yml >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          {
+            echo "TF_VAR_docker_compose_content<<EOF"
+            cat docker-related/docker-compose.yml
+            echo "EOF"
+          } >> $GITHUB_ENV
+      
       
       - name: Set litellm config content as env var
         run: |
-          echo "TF_VAR_litellm_config_content<<EOF" >> $GITHUB_ENV
-          cat docker-related/litellm_config.yaml >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      
+            {
+              echo "TF_VAR_litellm_config_content<<EOF"
+              cat docker-related/litellm_config.yaml
+              echo "EOF"
+            } >> $GITHUB_ENV
+        
       - name: Set prometheus config content as env var
         run: |
-          echo "TF_VAR_prometheus_config_content<<EOF" >> $GITHUB_ENV
-          cat docker-related/prometheus_config/prometheus.yml >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+            {
+              echo "TF_VAR_prometheus_config_content<<EOF"
+              cat docker-related/prometheus_config/prometheus.yml
+              echo "EOF"
+            } >> $GITHUB_ENV
+        
       
       - name: Terraform Init
         run: terraform init
