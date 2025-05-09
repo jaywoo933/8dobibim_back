@@ -4,10 +4,12 @@ variable "aws_region" {
   default     = "ap-northeast-2"
 }
 
-variable "ami_id" {
-  description = "Ubuntu AMI ID"
-  type        = string
-  
+variable "litellm_config_content" {
+  description = "Base64 decoded content for litellm_config.yaml"
+}
+
+variable "prometheus_config_content" {
+  description = "Base64 decoded content for prometheus.yml"
 }
 
 variable "instance_type" {

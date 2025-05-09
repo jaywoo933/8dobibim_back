@@ -1,4 +1,4 @@
-#!/bin/bash/
+#!/bin/bash
 set -e
 
 sudo apt-get update
@@ -11,6 +11,10 @@ mkdir -p /opt/openwebui
 cd /opt/openwebui
 
 echo "${env_file_content}" | base64 -d > .env
-echo "${docker_compose_content}" | base64 -d > docker-compose.yml
+echo "${docker_compose_content}" > docker-compose.yml
+echo "${litellm_config_content}" > litellm_config.yaml
+
+mkdir -p prometheus_config
+echo "${prometheus_config_content}" > prometheus_config/prometheus.yml
 
 docker-compose up -d
