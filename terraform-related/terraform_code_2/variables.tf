@@ -3,6 +3,10 @@ variable "aws_region" {
   type        = string
   default     = "ap-northeast-2"
 }
+variable "ami_id" {
+  description = "AMI ID for the EC2 instance"
+  type        = string
+}
 
 variable "litellm_config_content" {
   description = "Base64 decoded content for litellm_config.yaml"
