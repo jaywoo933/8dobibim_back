@@ -31,15 +31,16 @@ jobs:
         
       - name: Set docker-compose content as env var
         run: |
-          echo "TF_VAR_docker_compose_content=$(base64 < docker-related/docker-compose.yml | tr -d '\n')" >> $GITHUB_ENV
+          echo "TF_VAR_docker_compose_content=$(cat docker-related/docker-compose.yml)" >> $GITHUB_ENV
+      
       - name: Set litellm config content as env var
         run: |
-            echo "TF_VAR_litellm_config_content=$(base64 < docker-related/litellm_config.yaml | tr -d '\n')" >> $GITHUB_ENV
-        
+          echo "TF_VAR_litellm_config_content=$(cat docker-related/litellm_config.yaml)" >> $GITHUB_ENV
+      
       - name: Set prometheus config content as env var
         run: |
-            echo "TF_VAR_prometheus_config_content=$(base64 < docker-related/prometheus_config/prometheus.yml | tr -d '\n')" >> $GITHUB_ENV
-        
+          echo "TF_VAR_prometheus_config_content=$(cat docker-related/prometheus_config/prometheus.yml)" >> $GITHUB_ENV
+      
       - name: Terraform Init
         run: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
