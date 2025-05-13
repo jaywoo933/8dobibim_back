@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest  # GitHub Actions에서 사용할 실행 환경 (Ubuntu)
 
     env:
-      TF_WORKING_DIR: ./terraform-related/terraform_code_2  # Terraform 코드가 위치한 디렉토리
+      TF_WORKING_DIR: ./terraform-related/terraform  # Terraform 코드가 위치한 디렉토리
 
     steps:
       # 저장소 코드 체크아웃
