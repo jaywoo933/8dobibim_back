@@ -42,14 +42,6 @@ provider "helm" {
   }
 }
 
-# 예: kubectl로 YAML 직접 적용
-resource "null_resource" "apply_k8s_manifests" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ../kubernetes/manifests/"
-  }
-
-  depends_on = [data.aws_eks_cluster.eks]
-}
 
 # .env → Secret
 resource "kubernetes_secret" "litellm_env" {
