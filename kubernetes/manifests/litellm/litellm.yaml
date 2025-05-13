@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  labels:
+    app: litellm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      containers:
+      - name: litellm
+        image: ghcr.io/berriai/litellm:main-stable
+        ports:
+        - containerPort: 4000
+        envFrom:
+        - secretRef:
+            name: litellm-env   # <- .env 파일을 secret으로 생성한 이름
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+        command:
+          - "--host"
+          - "0.0.0.0"
+          - "--port"
+          - "4000"
+          - "--config"
+          - "/app/config.yaml"
+          - "--detailed_debug"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: litellm-config  # <- litellm_config.yaml을 기반으로 만든 ConfigMap 이름
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm
+spec:
+  selector:
+    app: litellm
+  ports:
+  - port: 4000
+    targetPort: 4000
+  type: ClusterIP

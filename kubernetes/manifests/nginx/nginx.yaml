@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    worker_processes auto;
+    events {
+      worker_connections 1024;
+    }
+    http {
+      include       mime.types;
+      default_type  application/octet-stream;
+
+      sendfile        on;
+      keepalive_timeout  65;
+
+      upstream openwebui_v1_servers {
+        server openwebui-v1:8080;
+      }
+
+      upstream openwebui_v2_servers {
+        server openwebui-v2:8080;
+      }
+
+      split_clients "$remote_addr" $ab_test_group {
+        80% openwebui_v1_servers;
+        * openwebui_v2_servers;
+      }
+
+      log_format ab_test_loki_format '$remote_addr - $remote_user [$time_local] "$request" '
+                                     '$status $body_bytes_sent "$http_referer" '
+                                     '"$http_user_agent" "$http_x_forwarded_for" '
+                                     '"$ab_test_group"';
+
+      server {
+        listen 80;
+        server_name localhost;
+
+        access_log /var/log/nginx/access.log ab_test_loki_format;
+
+        location / {
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+
+          proxy_pass http://$ab_test_group;
+
+          add_header Set-Cookie "ab_test=$ab_test_group; path=/";
+        }
+
+        location /nginx_status {
+          stub_status on;
+          allow 127.0.0.1;
+          deny all;
+        }
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-ab-proxy
+  labels:
+    app: nginx-ab-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-ab-proxy
+  template:
+    metadata:
+      labels:
+        app: nginx-ab-proxy
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: nginx-logs
+          mountPath: /var/log/nginx
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      - name: nginx-logs
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ab-proxy
+spec:
+  selector:
+    app: nginx-ab-proxy
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer

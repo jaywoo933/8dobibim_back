@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openwebui-app
+  namespace: argocd  # ArgoCD 설치된 네임스페이스
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/8dobibim/8dobibim_back
+    path: kubernetes/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

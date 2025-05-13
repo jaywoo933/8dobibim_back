@@ -1,0 +1,21 @@
+name: GitOps Deploy
+
+on:
+  push:
+    branches:
+      - kubernetes-test
+    paths:
+      - 'kubernetes/manifests/**'
+
+jobs:
+  validate-k8s:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Validate Kubernetes YAMLs
+      run: |
+        kubectl apply --dry-run=client -f ./kubernetes/manifests/
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}  # ✅ GitHub Secret로 base64된 kubeconfig 주입 필요
