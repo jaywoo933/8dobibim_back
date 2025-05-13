@@ -1,93 +1,46 @@
-#terraform-related/terraform/main.tf
-# main.tf (EKS 클러스터 기반)
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
-    }
   }
 }
 
-# EKS 클러스터 정보 가져오기
-data "aws_eks_cluster" "eks" {
-  name = var.cluster_name
+provider "aws" {
+  region = var.aws_region
 }
 
-data "aws_eks_cluster_auth" "eks" {
-  name = var.cluster_name
+# IAM Role for EKS Cluster
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "eks-cluster-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
+      Principal = {
+        Service = "eks.amazonaws.com"
+      }
+    }]
+  })
 }
 
-# Kubernetes Provider 설정 (EKS 클러스터 연동)
-provider "kubernetes" {
-  host                   = data.aws_eks_cluster.eks.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.eks.token
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
-# Helm Provider 설정 (Grafana, Loki 등 설치 가능)
-provider "helm" {
-  kubernetes {
-    host                   = data.aws_eks_cluster.eks.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.eks.token
-  }
-}
+# EKS Cluster
+resource "aws_eks_cluster" "this" {
+  name     = var.cluster_name
+  role_arn = aws_iam_role.eks_cluster_role.arn
+  version  = "1.29"
 
-
-# .env → Secret
-resource "kubernetes_secret" "litellm_env" {
-  metadata {
-    name = "litellm-env"
+  vpc_config {
+    subnet_ids = var.eks_subnet_ids
   }
 
-  data = {
-    ".env" = base64decode(var.env_file_content)
-  }
-
-  type = "Opaque"
-}
-
-# litellm_config.yaml → ConfigMap
-resource "kubernetes_config_map" "litellm_config" {
-  metadata {
-    name = "litellm-config"
-  }
-
-  data = {
-    "config.yaml" = base64decode(var.litellm_config_content)
-  }
-}
-
-# prometheus.yml → ConfigMap
-resource "kubernetes_config_map" "prometheus_config" {
-  metadata {
-    name = "prometheus-config"
-  }
-
-  data = {
-    "prometheus.yml" = base64decode(var.prometheus_config_content)
-  }
-}
-
-# YAML 적용 순서를 보장하기 위한 depends_on 수정
-resource "null_resource" "apply_k8s_manifests" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ../kubernetes/manifests/"
-  }
-
-  depends_on = [
-    kubernetes_secret.litellm_env,
-    kubernetes_config_map.litellm_config,
-    kubernetes_config_map.prometheus_config,
-    data.aws_eks_cluster.eks
-  ]
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_AmazonEKSClusterPolicy]
 }
