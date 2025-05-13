@@ -7,4 +7,12 @@ litellm_config_content     = "IyBsaXRlbGxtX2NvbmZpZy55YW1sIOyYiOyLnAoKbW9kZWxfbG
 prometheus_config_content  = "IyBwcm9tZXRoZXVzLnltbAoKZ2xvYmFsOgogIHNjcmFwZV9pbnRlcnZhbDogMTVzICMg6riw67O4IOyKpO2BrOueqSDqsITqsqkKICBldmFsdWF0aW9uX2ludGVydmFsOiAxNXMgIyDquLDrs7gg7Y+J6rCAIOqwhOqyqQoKc2NyYXBlX2NvbmZpZ3M6CiAgIyBQcm9tZXRoZXVzIOyekOyLoOydhCDsiqTtgazrnqntlZjripQg7ISk7KCVCiAgLSBqb2JfbmFtZTogJ3Byb21ldGhldXMnCiAgICBzdGF0aWNfY29uZmlnczoKICAgICAgLSB0YXJnZXRzOiBbJ2xvY2FsaG9zdDo5MDkwJ10gIyBQcm9tZXRoZXVzIOybuSBVSS9BUEkg7Y+s7Yq4CiAgLSBqb2JfbmFtZTogJ25naW54JwogICAgc3RhdGljX2NvbmZpZ3M6CiAgICAgIC0gdGFyZ2V0czogWyduZ2lueF9leHBvcnRlcjo5MTEzJ10KICAjIOuCmOykkeyXkCBMaXRlTExNIOuTsSDri6Trpbgg7ISc67mE7Iqk7JeQ7IScIOuplO2KuOumreydhCDsoJzqs7XtlZjrqbQg7Jes6riw7JeQIOy2lOqwgAogICMg7JiI7IucOiBMaXRlTExN7J20IDgwMDDrsogg7Y+s7Yq47JeQ7IScIOuplO2KuOumreydhCDsoJzqs7XtlZzri6Tqs6Ag6rCA7KCVCiAgIyAtIGpvYl9uYW1lOiAnbGl0ZWxsbScKICAjICAgc3RhdGljX2NvbmZpZ3M6CiAgIyAgICAgLSB0YXJnZXRzOiBbJ2xpdGVsbG06ODAwMCddICMgRG9ja2VyIOuEpO2KuOybjO2BrCDrgrQg7ISc67mE7IqkIOydtOumhOqzvCDrqZTtirjrpq0g7Y+s7Yq4"
 
 
+eks_cluster_name   = "openwebui" # 클러스터 이름
+eks_node_group_name = "openwebui-nodegroup" # 노드 그룹 이름
+eks_node_instance_type = "t3.medium" # 워커 노드 EC2 타입
+eks_desired_capacity = 2
+eks_min_size         = 1
+eks_max_size         = 3
+eks_subnet_ids       = ["subnet-0474e93aac9a5cfb1", "subnet-0412b72e56f287b9a"] # 퍼블릭/프라이빗 서브넷 ID들
+eks_vpc_id           = "vpc-0a37b568a72b59a37" # 클러스터가 들어갈 VPC ID
 
