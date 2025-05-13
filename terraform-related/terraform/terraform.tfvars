@@ -1,3 +1,4 @@
+#terraform-related/terraform/terraform.tfvars
 ami_id         = "ami-0d5bb3742db8fc264" # AWS EC2용 Ubuntu 20.04 AMI (리전: ap-northeast-2)
 instance_type  = "t3.medium"             # EC2 인스턴스 타입 (RAM/CPU 성능 확보를 위해 t3.medium 선택)
 subnet_id      = "subnet-019f43696c656abef" # 배포할 서브넷 ID

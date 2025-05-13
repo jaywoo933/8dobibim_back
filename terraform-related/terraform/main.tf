@@ -1,3 +1,4 @@
+#terraform-related/terraform/main.tf
 # EC2 인스턴스 생성 리소스 정의
 resource "aws_instance" "docker_host" {
   ami                    = var.ami_id               # 사용할 Amazon Machine Image ID (예: Ubuntu 20.04)

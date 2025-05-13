@@ -1,4 +1,4 @@
-# terraform-related/terraform_code_2/provider.tf
+# terraform-related/terraform/provider.tf
 
 # Terraform에서 사용할 프로바이더 정의
 terraform {

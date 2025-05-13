@@ -1,3 +1,4 @@
+#terraform-related/terraform/variables.tf
 # AWS 리전 (기본값: 서울 리전)
 variable "aws_region" {
   description = "AWS 리전"
