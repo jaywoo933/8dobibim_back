@@ -1,74 +1,25 @@
 apiVersion: v1
-kind: ConfigMap
+kind: ConfigMap  # 설정 데이터를 key-value 형식으로 저장
 metadata:
-  name: prometheus-config
+  name: prometheus-config  # ConfigMap 이름
   labels:
-    app: prometheus
+    app: prometheus  # 관련 리소스끼리 묶기 위한 라벨
 data:
-  prometheus.yml: |
+  prometheus.yml: |  # Prometheus 설정 파일 내용
     global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
+      scrape_interval: 15s  # 메트릭 수집 주기 (기본값)
+      evaluation_interval: 15s  # 규칙 평가 주기 (알람 등에서 사용)
 
     scrape_configs:
-      - job_name: 'prometheus'
+      - job_name: 'prometheus'  # 자체 Prometheus 서버 메트릭 수집
         static_configs:
           - targets: ['localhost:9090']
 
-      - job_name: 'nginx'
+      - job_name: 'nginx'  # Nginx exporter를 수집 대상에 추가
         static_configs:
-          - targets: ['nginx-exporter:9113']
-          
-      # 향후 추가할 수 있는 LLM 서비스 예시:
+          - targets: ['nginx-exporter:9113']  # Nginx exporter 서비스의 주소
+
+      # 향후 LiteLLM과 같은 LLM 서비스 모니터링 추가 가능
       # - job_name: 'litellm'
       #   static_configs:
       #     - targets: ['litellm:8000']
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: prometheus
-  labels:
-    app: prometheus
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: prometheus
-  template:
-    metadata:
-      labels:
-        app: prometheus
-    spec:
-      containers:
-      - name: prometheus
-        image: prom/prometheus:latest
-        args:
-          - "--config.file=/etc/prometheus/prometheus.yml"
-        ports:
-        - containerPort: 9090
-        volumeMounts:
-        - name: prometheus-config
-          mountPath: /etc/prometheus
-        - name: prometheus-data
-          mountPath: /prometheus
-      volumes:
-      - name: prometheus-config
-        configMap:
-          name: prometheus-config
-      - name: prometheus-data
-        emptyDir: {}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: prometheus
-spec:
-  selector:
-    app: prometheus
-  ports:
-  - port: 9090
-    targetPort: 9090
-  type: ClusterIP

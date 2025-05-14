@@ -1,0 +1,13 @@
+cluster_name = "your-cluster-name"
+env_file_content = "base64-encoded-env-content"
+litellm_config_content = "base64-encoded-litellm-content"
+prometheus_config_content = "base64-encoded-prometheus-config"
+
+eks_cluster_name       = "your-cluster-name"
+eks_node_group_name    = "your-node-group"
+eks_node_instance_type = "t3.medium"
+eks_desired_capacity   = 2
+eks_min_size           = 1
+eks_max_size           = 3
+eks_subnet_ids         = ["subnet-xxxxxxxx", "subnet-yyyyyyyy"]
+eks_vpc_id             = "vpc-zzzzzzzz"

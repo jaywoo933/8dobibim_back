@@ -20,6 +20,6 @@ __pycache__/
 .terraform.lock.hcl
 terraform-related/terraform/terraform.tfstate
 terraform-related/terraform/terraform.tfstate.backup
-
+terraform-related/terraform/terraform.tfvars
 terraform-related/terraform/.terraform.lock.hcl
 terraform-related/terraform/.terraform/providers/registry.terraform.io

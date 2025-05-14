@@ -1,3 +1,4 @@
+#main.tf과 중복 선언 충돌 해결 위해 주석 처리
 # terraform {
 #   required_providers {
 #     aws = {

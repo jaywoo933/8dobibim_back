@@ -3,90 +3,94 @@ name: Deploy to AWS EKS
 on:
   push:
     branches:
-      - kubernetes-test
+      - kubernetes-test  # kubernetes-test 브랜치에 푸시될 때 트리거
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Ubuntu 최신 버전에서 실행
 
     env:
-      TF_WORKING_DIR: ./terraform-related/terraform
-      ARGOCD_PASSWORD_HASH: $2a$10$8K9jKpK7a9c6xL8zFiZ65uHpYz9ROzAyl3PzGp6u2Fj0CeLccL5tK
+      TF_WORKING_DIR: ./terraform-related/terraform  # Terraform 작업 디렉토리
+      ARGOCD_PASSWORD_HASH: $2a$10$8K9jKpK7a9c6xL8zFiZ65uHpYz9ROzAyl3PzGp6u2Fj0CeLccL5tK  # ArgoCD admin 비밀번호 해시
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # 코드 리포지토리에서 체크아웃
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v2  # Terraform 설정
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v4  # AWS 자격 증명 설정
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # GitHub secrets에서 AWS 액세스 키 가져오기
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # GitHub secrets에서 AWS 비밀 키 가져오기
+          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-2' }}  # AWS 지역 설정
 
       - name: Set Secrets as Environment Variables
         run: |
-          echo "TF_VAR_env_file_content=${{ secrets.DOT_ENV_CONTENT }}" >> $GITHUB_ENV
-          echo "TF_VAR_litellm_config_content=$(base64 < docker-related/litellm_config.yaml | tr -d '\n')" >> $GITHUB_ENV
-          echo "TF_VAR_prometheus_config_content=$(base64 < docker-related/prometheus_config/prometheus.yml | tr -d '\n')" >> $GITHUB_ENV
+          echo "TF_VAR_env_file_content=${{ secrets.DOT_ENV_CONTENT }}" >> $GITHUB_ENV  # 환경 변수로 .env 파일 내용 설정
+          echo "TF_VAR_litellm_config_content=$(base64 < docker-related/litellm_config.yaml | tr -d '\n')" >> $GITHUB_ENV  # litellm 설정을 base64로 변환하여 환경 변수로 설정
+          echo "TF_VAR_prometheus_config_content=$(base64 < docker-related/prometheus_config/prometheus.yml | tr -d '\n')" >> $GITHUB_ENV  # Prometheus 설정을 base64로 변환하여 환경 변수로 설정
 
       - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init  # Terraform 초기화
+        working-directory: ${{ env.TF_WORKING_DIR }}  # 작업 디렉토리 지정
 
       - name: Terraform Plan
-        run: terraform plan -var-file="terraform.tfvars" -input=false
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan -var-file="terraform.tfvars" -input=false  # Terraform 계획을 실행
+        working-directory: ${{ env.TF_WORKING_DIR }}  # 작업 디렉토리 지정
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="terraform.tfvars" -input=false
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -var-file="terraform.tfvars" -input=false  # Terraform 적용
+        working-directory: ${{ env.TF_WORKING_DIR }}  # 작업 디렉토리 지정
 
       - name: Update Kubeconfig
-        run: aws eks update-kubeconfig --region ap-northeast-2 --name openwebui
+        run: aws eks update-kubeconfig --region ap-northeast-2 --name openwebui  # EKS 클러스터에 대한 kubeconfig 파일 업데이트
 
       - name: Apply aws-auth ConfigMap and wait for node
         run: |
-          echo "Applying aws-auth ConfigMap..."
-          kubectl apply -f kubernetes/manifests/aws-auth.yaml -n kube-system
-      
-          echo "Waiting for EKS node to register..."
+          echo "Applying aws-auth ConfigMap..."  # aws-auth ConfigMap 적용
+          kubectl apply -f kubernetes/manifests/aws-auth.yaml -n kube-system   # EKS 노드를 인증하기 위해 aws-auth.yaml 적용
+
+          echo "Waiting for EKS node to register..."  # EKS 노드가 등록될 때까지 대기
           for i in {1..30}; do
             COUNT=$(kubectl get nodes --no-headers 2>/dev/null | wc -l)
             if [ "$COUNT" -gt 0 ]; then
-              echo "✅ EKS node registered!"
+              echo "✅ EKS node registered!"  # 노드가 등록되었으면 성공 메시지
               break
             fi
-            echo "⏳ Still waiting for node... ($i/30)"
-            sleep 10
+            echo "⏳ Still waiting for node... ($i/30)"  # 노드가 아직 등록되지 않았으면 계속 대기
+            sleep 10  # 10초 대기 후 재시도
           done
-      
+
           if [ "$COUNT" -eq 0 ]; then
-            echo "❌ Timeout: No EKS nodes registered after 5 minutes."
+            echo "❌ Timeout: No EKS nodes registered after 5 minutes."  # 5분 후에도 등록되지 않으면 실패 처리
             exit 1
           fi
-      
+
       - name: Install ArgoCD
         run: |
-          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -  # ArgoCD 네임스페이스 생성
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml  # ArgoCD 설치
 
       - name: Wait for ArgoCD to be Ready
         run: |
-          echo "Waiting for ArgoCD server pod to be ready..."
-          kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd
+          echo "Waiting for ArgoCD server pod to be ready..."  # ArgoCD 서버 Pod이 준비되기를 대기
+          kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd  # 180초 동안 ArgoCD 서버가 준비되길 대기
+
+      - name: Expose ArgoCD Server with LoadBalancer
+        run: kubectl apply -f argocd/argocd-server-service.yaml  # ArgoCD 서버를 LoadBalancer로 노출하여 외부에서 접근 가능하게 설정
 
       - name: Apply ArgoCD Application
-        run: kubectl apply -f argocd/argocd-app.yaml
+        run: kubectl apply -f argocd/argocd-app.yaml  # ArgoCD 애플리케이션 배포
 
       - name: Set ArgoCD admin password to 'your-password'
         run: |
-          echo "Patching ArgoCD admin password..."
+          echo "Patching ArgoCD admin password..."  # ArgoCD admin 비밀번호를 패치
           kubectl -n argocd patch secret argocd-secret \
-            -p '{"stringData": {"admin.password": "${{ env.ARGOCD_PASSWORD_HASH }}", "admin.passwordMtime": "'$(date +%FT%T%Z)'"}}'
+            -p '{"stringData": {"admin.password": "${{ env.ARGOCD_PASSWORD_HASH }}", "admin.passwordMtime": "'$(date +%FT%T%Z)'"}}'  # 환경 변수에서 비밀번호 해시 값을 가져와 패치
           
-          echo "Restarting ArgoCD server pod to apply new password..."
-          kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server
+          echo "Restarting ArgoCD server pod to apply new password..."  # 새 비밀번호를 적용하기 위해 ArgoCD 서버 Pod 재시작
+          kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server  # Pod 삭제 후 자동으로 재시작
+
