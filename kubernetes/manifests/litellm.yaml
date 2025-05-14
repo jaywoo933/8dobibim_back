@@ -37,7 +37,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: litellm-config  # <- litellm_config.yaml을 기반으로 만든 ConfigMap 이름
+          name: litellm-config  
 
 ---
 apiVersion: v1
