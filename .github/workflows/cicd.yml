@@ -48,12 +48,27 @@ jobs:
       - name: Update Kubeconfig
         run: aws eks update-kubeconfig --region ap-northeast-2 --name openwebui
 
-      - name: Apply aws-auth ConfigMap
+      - name: Apply aws-auth ConfigMap and wait for node
         run: |
-          echo "Waiting for EKS nodes to register..."
-          sleep 90
+          echo "Applying aws-auth ConfigMap..."
           kubectl apply -f kubernetes/manifests/aws-auth.yaml -n kube-system
-
+      
+          echo "Waiting for EKS node to register..."
+          for i in {1..30}; do
+            COUNT=$(kubectl get nodes --no-headers 2>/dev/null | wc -l)
+            if [ "$COUNT" -gt 0 ]; then
+              echo "✅ EKS node registered!"
+              break
+            fi
+            echo "⏳ Still waiting for node... ($i/30)"
+            sleep 10
+          done
+      
+          if [ "$COUNT" -eq 0 ]; then
+            echo "❌ Timeout: No EKS nodes registered after 5 minutes."
+            exit 1
+          fi
+      
       - name: Install ArgoCD
         run: |
           kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
