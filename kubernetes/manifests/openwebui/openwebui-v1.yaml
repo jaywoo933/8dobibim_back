@@ -8,11 +8,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: openwebui-v1
+      app: openwebui      # ✅ 공통 레이블 (Service 연결용)
+      version: v1         # 🔄 버전 구분용 (선택적)
   template:
     metadata:
       labels:
-        app: openwebui-v1
+        app: openwebui    # ✅ 공통 레이블 (Service 연결용)
+        version: v1
     spec:
       containers:
       - name: openwebui
@@ -29,17 +31,4 @@ spec:
           mountPath: /app/backend/data
       volumes:
       - name: openwebui-data
-        emptyDir: {}  # 필요시 PVC로 교체 가능
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: openwebui-v1
-spec:
-  selector:
-    app: openwebui-v1
-  ports:
-  - port: 8080
-    targetPort: 8080
-  type: ClusterIP
+        emptyDir: {}

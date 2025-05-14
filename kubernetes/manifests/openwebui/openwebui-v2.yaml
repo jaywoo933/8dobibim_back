@@ -8,15 +8,17 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: openwebui-v2
+      app: openwebui      
+      version: v2        
   template:
     metadata:
       labels:
-        app: openwebui-v2
+        app: openwebui    
+        version: v2
     spec:
       containers:
       - name: openwebui
-        image: ghcr.io/open-webui/open-webui:main  # V2용 다른 버전 태그 사용 가능
+        image: ghcr.io/open-webui/open-webui:main
         ports:
         - containerPort: 8080
         env:
@@ -30,16 +32,3 @@ spec:
       volumes:
       - name: openwebui-data
         emptyDir: {}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: openwebui-v2
-spec:
-  selector:
-    app: openwebui-v2
-  ports:
-  - port: 8080
-    targetPort: 8080
-  type: ClusterIP

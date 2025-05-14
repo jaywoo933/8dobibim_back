@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/8dobibim/8dobibim_back
-    targetRevision: kubernetes-test  # 🔧 여기에 브랜치 이름 추가
+    targetRevision: kubernetes-test 
     path: kubernetes/manifests
   destination:
     server: https://kubernetes.default.svc
