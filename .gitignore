@@ -13,7 +13,8 @@ _work/
 *.pyc
 __pycache__/
 .vscode/
-
+#쿠버네티스
+kubernetes/manifests/aws/aws-auth.yaml
 #terraform 디렉토리 및 상태파일
 .terraform
 .terraform.lock.hcl
