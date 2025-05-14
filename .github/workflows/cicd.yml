@@ -1,4 +1,3 @@
-#.github/workflows/cicd.yml
 name: Deploy to AWS EKS
 
 on:
@@ -12,6 +11,7 @@ jobs:
 
     env:
       TF_WORKING_DIR: ./terraform-related/terraform
+      ARGOCD_PASSWORD_HASH: $2a$10$8K9jKpK7a9c6xL8zFiZ65uHpYz9ROzAyl3PzGp6u2Fj0CeLccL5tK
 
     steps:
       - name: Checkout code
@@ -44,13 +44,14 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -var-file="terraform.tfvars" -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
+
       - name: Update Kubeconfig
         run: aws eks update-kubeconfig --region ap-northeast-2 --name openwebui
-      
+
       - name: Apply aws-auth ConfigMap
         run: |
           echo "Waiting for EKS nodes to register..."
-          sleep 90  # 노드 준비 시간 대기
+          sleep 90
           kubectl apply -f kubernetes/manifests/aws-auth.yaml -n kube-system
 
       - name: Install ArgoCD
@@ -64,9 +65,13 @@ jobs:
           kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd
 
       - name: Apply ArgoCD Application
-        run: |
-          kubectl apply -f argocd/argocd-app.yaml
+        run: kubectl apply -f argocd/argocd-app.yaml
+
       - name: Set ArgoCD admin password to 'your-password'
         run: |
+          echo "Patching ArgoCD admin password..."
           kubectl -n argocd patch secret argocd-secret \
-            -p '{"stringData": {"admin.password": "$2a$10$8K9jKpK7a9c6xL8zFiZ65uHpYz9ROzAyl3PzGp6u2Fj0CeLccL5tK", "admin.passwordMtime": "'$(date +%FT%T%Z)'"}}'
+            -p '{"stringData": {"admin.password": "${{ env.ARGOCD_PASSWORD_HASH }}", "admin.passwordMtime": "'$(date +%FT%T%Z)'"}}'
+          
+          echo "Restarting ArgoCD server pod to apply new password..."
+          kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server
