@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "Waiting for EKS nodes to register..."
           sleep 90  # 노드 준비 시간 대기
-          kubectl apply -f kubernetes/manifests/aws/aws-auth.yaml -n kube-system
+          kubectl apply -f kubernetes/manifests/aws-auth.yaml -n kube-system
 
       - name: Install ArgoCD
         run: |
