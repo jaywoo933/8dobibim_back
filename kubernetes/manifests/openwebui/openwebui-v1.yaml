@@ -2,33 +2,34 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: openwebui-v1
+  namespace: default
   labels:
     app: openwebui-v1
+    app: openwebui  # A/B 테스트용 공통 라벨
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: openwebui      # ✅ 공통 레이블 (Service 연결용)
-      version: v1         # 🔄 버전 구분용 (선택적)
+      app: openwebui-v1
   template:
     metadata:
       labels:
-        app: openwebui    # ✅ 공통 레이블 (Service 연결용)
-        version: v1
+        app: openwebui-v1
+        app: openwebui
     spec:
       containers:
-      - name: openwebui
-        image: ghcr.io/open-webui/open-webui:v0.6.6
-        ports:
-        - containerPort: 8080
-        env:
-        - name: OPENAI_API_BASE_URL
-          value: http://litellm:4000/
-        - name: OPENAI_API_KEY
-          value: dummy-key
-        volumeMounts:
-        - name: openwebui-data
-          mountPath: /app/backend/data
+        - name: openwebui
+          image: ghcr.io/open-webui/open-webui:v0.6.6
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OPENAI_API_BASE_URL
+              value: http://litellm:4000/
+            - name: OPENAI_API_KEY
+              value: dummy-key
+          volumeMounts:
+            - name: openwebui-data
+              mountPath: /app/backend/data
       volumes:
-      - name: openwebui-data
-        emptyDir: {}
+        - name: openwebui-data
+          emptyDir: {}
