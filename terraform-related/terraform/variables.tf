@@ -48,3 +48,16 @@ variable "prometheus_config_content" {
   description = "prometheus 설정 파일 내용 (base64 인코딩)"
   sensitive   = true
 }
+
+
+variable "litellm_config_content" {
+  description = "Base64 encoded litellm_config.yaml content"
+  type        = string
+  default     = ""
+}
+
+variable "eks_cluster_name" {
+  description = "EKS cluster name"
+  type        = string
+  default     = "openwebui"
+}

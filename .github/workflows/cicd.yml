@@ -50,7 +50,7 @@ jobs:
       - name: Apply aws-auth ConfigMap
         run: |
           echo "Waiting for EKS nodes to register..."
-          sleep 30  # 노드 준비 시간 대기
+          sleep 90  # 노드 준비 시간 대기
           kubectl apply -f kubernetes/manifests/aws/aws-auth.yaml -n kube-system
 
       - name: Install ArgoCD
