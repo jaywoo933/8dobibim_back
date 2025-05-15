@@ -4,7 +4,7 @@ cluster_name = "openwebui"
 
 eks_cluster_name   = "openwebui" # 클러스터 이름
 eks_node_group_name = "openwebui-nodegroup" # 노드 그룹 이름
-eks_node_instance_type = "t3.medium" # 워커 노드 EC2 타입
+eks_node_instance_type = "t3.large" # 워커 노드 EC2 타입
 eks_desired_capacity = 2
 eks_min_size         = 1
 eks_max_size         = 3
