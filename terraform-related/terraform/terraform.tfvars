@@ -1,5 +1,6 @@
 #terraform-related/terraform/terraform.tfvars
 
+cluster_name = "openwebui"
 
 eks_cluster_name   = "openwebui" # 클러스터 이름
 eks_node_group_name = "openwebui-nodegroup" # 노드 그룹 이름
