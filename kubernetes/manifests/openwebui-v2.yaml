@@ -1,3 +1,4 @@
+#kubernetes/manifests/openwebui-v2.yaml
 apiVersion: apps/v1  # Deployment 리소스를 정의하는 API 그룹
 kind: Deployment  # 파드의 생명주기와 스케일링을 관리하는 리소스
 metadata:
@@ -30,9 +31,11 @@ spec:
           env:
             - name: OPENAI_API_BASE_URL
               value: http://litellm:4000/  # LiteLLM 프록시 서비스 주소 (같은 네임스페이스에 존재해야 함)
-
             - name: OPENAI_API_KEY
-              value: dummy-key  # 임시 API 키 (운영 환경에서는 Secret으로 대체 필요)
+              valueFrom:
+                secretKeyRef:
+                  name: api-credentials
+                  key: litellm-master-key
 
           volumeMounts:
             - name: openwebui-data

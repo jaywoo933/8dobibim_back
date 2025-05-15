@@ -1,3 +1,4 @@
+#kubernetes/manifests/litellm-service.yaml
 apiVersion: v1  # Core API 버전
 kind: Service  # 서비스 리소스
 metadata:

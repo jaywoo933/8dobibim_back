@@ -1,3 +1,4 @@
+#argocd/argocd-server-service.yaml
 apiVersion: v1  # Kubernetes core API 버전
 kind: Service  # 리소스 종류는 Service (클러스터 내에서 네트워크 접근을 위해 사용)
 metadata:

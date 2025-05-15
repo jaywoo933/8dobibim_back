@@ -1,3 +1,4 @@
+#kubernetes/manifests/nginx-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment  # 파드의 생성, 업데이트, 스케일링을 관리하는 리소스
 metadata:

@@ -1,3 +1,4 @@
+#kubernetes/manifests/openwebui-v1-service.yaml
 apiVersion: v1  # Kubernetes core API 그룹 (Service는 항상 v1)
 kind: Service  # 리소스 종류: 클러스터 내부 또는 외부로 트래픽을 전달하는 서비스
 metadata:

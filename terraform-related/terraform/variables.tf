@@ -1,3 +1,4 @@
+#terraform-related/terraform/variables.tf
 # AWS 리전 설정 (기본값: 서울 리전)
 variable "aws_region" {
   type        = string
@@ -45,33 +46,75 @@ variable "eks_subnet_ids" {
   type = list(string)
 }
 
-# -------------------- 추가 변수 --------------------
 
-# .env 파일의 내용 (base64 인코딩된 문자열)
-# 예: OPENAI_API_KEY, DATABASE_URL 등 민감 정보 포함
-variable "env_file_content" {
-  type        = string
-  description = ".env 파일 내용 (base64 인코딩)"
-  sensitive   = true  # 터미널 출력 방지
-}
-
-# Prometheus 설정 파일 (prometheus.yml) base64 인코딩된 문자열
-variable "prometheus_config_content" {
-  type        = string
-  description = "prometheus 설정 파일 내용 (base64 인코딩)"
-  sensitive   = true
-}
-
-# litellm_config.yaml 내용 (base64 인코딩)
-variable "litellm_config_content" {
-  description = "Base64 encoded litellm_config.yaml content"
-  type        = string
-  default     = ""  # 필수는 아님
-}
 
 # eks_cluster_name이 위 cluster_name과 중복될 경우도 있으므로 따로 사용 가능
 variable "eks_cluster_name" {
   description = "EKS cluster name"
   type        = string
   default     = "openwebui"
+}
+
+
+# API 키 관련 변수들
+variable "gemini_api_key" {
+  description = "Gemini API Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "azure_api_key" {
+  description = "Azure OpenAI API Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "azure_api_base" {
+  description = "Azure OpenAI API Base URL"
+  type        = string
+}
+
+variable "azure_api_version" {
+  description = "Azure OpenAI API Version"
+  type        = string
+  default     = "2024-02-15-preview"
+}
+
+# 데이터베이스 관련 변수들
+variable "postgres_db" {
+  description = "PostgreSQL Database Name"
+  type        = string
+  default     = "litellm_db"
+}
+
+variable "postgres_user" {
+  description = "PostgreSQL Username"
+  type        = string
+  default     = "litellm_user"
+}
+
+variable "postgres_password" {
+  description = "PostgreSQL Password"
+  type        = string
+  sensitive   = true
+}
+
+variable "database_url" {
+  description = "Full PostgreSQL Connection URL"
+  type        = string
+  sensitive   = true
+  default     = "postgresql://litellm_user:4321@postgres:5432/litellm_db"
+}
+
+# LiteLLM 관련 변수들
+variable "litellm_master_key" {
+  description = "LiteLLM Master Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "litellm_salt_key" {
+  description = "LiteLLM Salt Key"
+  type        = string
+  sensitive   = true
 }

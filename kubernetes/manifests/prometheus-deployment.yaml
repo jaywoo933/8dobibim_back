@@ -1,3 +1,4 @@
+#kubernetes/manifests/prometheus-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment  # 파드 생명주기 및 배포 관리
 metadata:
