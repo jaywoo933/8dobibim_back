@@ -67,11 +67,15 @@ spec:
         - name: config-volume
           mountPath: /app/config.yaml
           subPath: config.yaml
-        command:
+        command: 
+          - "python"
+          - "-m"
+          - "litellm"
+        args:
           - "--host"
           - "0.0.0.0"
           - "--port"
-          - "4000"
+          - "4000" 
           - "--config"
           - "/app/config.yaml"
           - "--detailed_debug"
