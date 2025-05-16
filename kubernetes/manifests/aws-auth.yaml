@@ -5,7 +5,7 @@ metadata:
   name: aws-auth  # ConfigMap 이름은 반드시 'aws-auth'이어야 EKS에서 인식함
   namespace: kube-system  # aws-auth는 kube-system 네임스페이스에 존재해야 함 (EKS 시스템 구성요소 위치)
 data:
-  mapRoles: |  # IAM 역할(Role)과 Kubernetes 사용자(User)를 매핑해주는 항목
+  mapRoles: |  # IAM 역할(Role)과 Kubernetes 사용자(User)를 매핑하는 항목
     - rolearn: arn:aws:iam::830325869889:role/eks-node-role-openwebui  # EC2 워커 노드에 연결된 IAM 역할
       username: system:node:{{EC2PrivateDNSName}}  # Kubernetes 노드로 인식될 사용자 이름 (템플릿 변수 사용)
       groups:
