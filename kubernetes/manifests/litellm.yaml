@@ -62,7 +62,7 @@ spec:
               secretKeyRef:
                 name: db-credentials  # 데이터베이스 정보를 저장한 Secret
                 key: database-url
-                
+     #command 변경           
         volumeMounts:
         - name: config-volume
           mountPath: /app/config.yaml
